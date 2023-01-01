@@ -79,7 +79,7 @@ class AppUserServiceTest {
     }
 
     @Test
-    public void saveUserAndCreateBookingWhenSeatNumberIsGreaterThanHundredIsUnSuccessful()
+    public void saveUserAndCreateBookingWhenSeatNumberIsGreaterThanHundredIsUnsuccessful()
     throws IllegalArgumentException {
         AppUser appUser1 = AppUser.builder()
                 .id(1L)
@@ -88,7 +88,6 @@ class AppUserServiceTest {
                 .booking(Booking.builder().id(1L).seatNumber(150).build())
                 .build();
         appUserRepository.save(appUser1);
-
 
         assertThatThrownBy(() -> appUserService.signUpUser(appUser1))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -111,4 +110,39 @@ class AppUserServiceTest {
         assertThat(deletedId).isEmpty();
     }
 
+    @Test
+    public void updateUserAndBookingIsSuccessful() {
+        AppUser appUser1 = AppUser.builder()
+                .id(1L)
+                .name("Chidi")
+                .email("chidi@gmail.com")
+                .booking(Booking.builder().id(1L).seatNumber(2).build())
+                .build();
+        appUserRepository.save(appUser1);
+
+        when(appUserRepository.findById(1L)).thenReturn(Optional.of(appUser1));
+         appUserService.updateUser(1L, appUser1);
+         appUser1.setEmail("Chidii@gmail.com");
+         appUserRepository.save(appUser1);
+
+        verify(appUserRepository, times(1)).findById(anyLong());
+        assertThat(appUser1.getEmail()).isEqualTo("Chidii@gmail.com");
+        assertThat(appUser1.getBooking()).hasFieldOrPropertyWithValue("seatNumber", 2);
+    }
+
+    @Test
+    public void updateUserAndBookingWhenSeatNumberIsGreaterThanHundredIsUnsuccessful()
+            throws IllegalArgumentException {
+        AppUser appUser1 = AppUser.builder()
+                .id(1L)
+                .name("Chidi")
+                .email("chidi@gmail.com")
+                .booking(Booking.builder().id(1L).seatNumber(150).build())
+                .build();
+        appUserRepository.save(appUser1);
+
+        assertThatThrownBy(() -> appUserService.updateUser(1L, appUser1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(String.format("%d does not exist", appUser1.getId()));
+    }
 }

@@ -29,10 +29,16 @@ public class AppUserController {
        return appUserService.listAllUsers();
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{userId}")
     @Operation(tags = "delete a user via userId")
     public String deleteUser(@PathVariable Long userId) {
       return   appUserService.deleteUser(userId);
+    }
+
+    @PutMapping("{userId}")
+    @Operation(tags = "Update app user details")
+    public String updateUser(@PathVariable Long userId, @RequestBody AppUser newAppUserDetails) {
+        return appUserService.updateUser(userId, newAppUserDetails);
     }
 
 }

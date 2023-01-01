@@ -17,7 +17,7 @@ public class AppUserService {
 
     public String signUpUser(AppUser appUser) {
         if (appUser.getBooking().getSeatNumber() > 100){
-             throw new IllegalArgumentException("only seat number 1 - 100 is available");
+             throw  new IllegalArgumentException("only seat number 1 - 100 is available");
         } else {
             appUserRepository.save(appUser);
             Integer assignedSeatNumber = appUser.getBooking().getSeatNumber();
@@ -35,6 +35,17 @@ public class AppUserService {
         return String.format("User with %d has been deleted", userId);
     }
 
+    public String updateUser(Long userId, AppUser newAppUserDetails) {
+       return appUserRepository.findById(userId)
+                .map(existingDetail -> {
+                    existingDetail.setName(newAppUserDetails.getName());
+                    existingDetail.setEmail(newAppUserDetails.getEmail());
+                    existingDetail.setBooking(newAppUserDetails.getBooking());
+                    appUserRepository.save(newAppUserDetails);
+                    return "AppUser details has been updated successfully";
+                }).orElseThrow(() -> new IllegalArgumentException(
+                        String.format("%d does not exist", userId)));
+    }
 }
 
 
