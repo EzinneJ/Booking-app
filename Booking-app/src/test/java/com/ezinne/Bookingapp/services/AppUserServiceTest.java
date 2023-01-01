@@ -131,15 +131,14 @@ class AppUserServiceTest {
     }
 
     @Test
-    public void updateUserAndBookingWhenSeatNumberIsGreaterThanHundredIsUnsuccessful()
+    public void updateUserAndBookingWhenIdDoesNotExistIsUnsuccessful()
             throws IllegalArgumentException {
         AppUser appUser1 = AppUser.builder()
                 .id(1L)
                 .name("Chidi")
                 .email("chidi@gmail.com")
-                .booking(Booking.builder().id(1L).seatNumber(150).build())
+                .booking(Booking.builder().id(1L).seatNumber(10).build())
                 .build();
-        appUserRepository.save(appUser1);
 
         assertThatThrownBy(() -> appUserService.updateUser(1L, appUser1))
                 .isInstanceOf(IllegalArgumentException.class)
