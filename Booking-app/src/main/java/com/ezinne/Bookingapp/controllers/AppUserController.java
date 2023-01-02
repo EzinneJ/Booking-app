@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/user/")
+@RequestMapping("/api/v1/user")
 public class AppUserController {
     private final AppUserService appUserService;
 
@@ -17,7 +17,7 @@ public class AppUserController {
         this.appUserService = appUserService;
     }
 
-    @PostMapping("signup")
+    @PostMapping("/signup")
     @Operation(tags = "Sign up as a user")
     public String signUpUser(@RequestBody AppUser user) {
       return appUserService.signUpUser(user);
@@ -29,13 +29,13 @@ public class AppUserController {
        return appUserService.listAllUsers();
     }
 
-    @DeleteMapping("{userId}")
+    @DeleteMapping("/{userId}")
     @Operation(tags = "delete a user via userId")
     public String deleteUser(@PathVariable Long userId) {
       return   appUserService.deleteUser(userId);
     }
 
-    @PutMapping("{userId}")
+    @PutMapping("/{userId}")
     @Operation(tags = "Update app user details")
     public String updateUser(@PathVariable Long userId, @RequestBody AppUser newAppUserDetails) {
         return appUserService.updateUser(userId, newAppUserDetails);
