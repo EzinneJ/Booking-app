@@ -4,6 +4,7 @@ import com.ezinne.Bookingapp.model.AppUser;
 import com.ezinne.Bookingapp.model.Booking;
 import com.ezinne.Bookingapp.services.AppUserService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class AppUserController {
     }
 
     @PostMapping("/signup")
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(tags = "Sign up as a user")
     public String signUpUser(@RequestBody AppUser user) {
       return appUserService.signUpUser(user);

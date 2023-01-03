@@ -1,7 +1,10 @@
 package com.ezinne.Bookingapp.controllers;
 
 import com.ezinne.Bookingapp.BookingAppApplication;
+import com.ezinne.Bookingapp.model.AppUser;
+import com.ezinne.Bookingapp.model.Booking;
 import com.ezinne.Bookingapp.services.AppUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -20,6 +24,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -41,6 +47,9 @@ class AppUserControllerIT {
     private WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -67,13 +76,23 @@ class AppUserControllerIT {
 
     @Test
     public void givenPostURI_whenMockMVC_thenUserIsCreated() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(post("http://localhost:8081/api/v1/user/signup"))
+        AppUser appUser1 = AppUser.builder()
+                .id(1L)
+                .name("Chidi")
+                .email("chidi@gmail.com")
+                .booking(Booking.builder().id(1L).seatNumber(2).build())
+                .build();
+        appUserService.signUpUser(appUser1);
 
-                .andDo(print()).andExpect(status().isOk())
+        MvcResult mvcResult = this.mockMvc.perform(post("http://localhost:8081/api/v1/user/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appUser1)))
+                .andExpect(status().isCreated())
                 .andReturn();
 
-        assertEquals("application/json",
+        assertEquals("text/plain;charset=UTF-8",
                 mvcResult.getResponse().getContentType());
+        verify(appUserService).signUpUser(any());
     }
 
 }
