@@ -5,47 +5,50 @@ import com.ezinne.Bookingapp.model.AppUser;
 import com.ezinne.Bookingapp.model.Booking;
 import com.ezinne.Bookingapp.services.AppUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { BookingAppApplication.class })
-@WebAppConfiguration
-@DirtiesContext
+@ContextConfiguration(classes = BookingAppApplication.class)
+@AutoConfigureMockMvc
+@Testcontainers
 @SpringBootTest
 class AppUserControllerIT {
 
-    @Mock
+    @Autowired
     private AppUserService appUserService;
 
-    @InjectMocks
-    private AppUserController appUserController;
+    static DockerImageName myImage = DockerImageName.parse("postgresql:latest").asCompatibleSubstituteFor("postgres");
+
+    @Container
+    private static PostgreSQLContainer postgreSQLContainer =
+            new PostgreSQLContainer(myImage);
+
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -57,17 +60,9 @@ class AppUserControllerIT {
     }
 
     @Test
-    public void givenWac_whenServletContext_thenItProvidesAppUserController() {
-        ServletContext servletContext = webApplicationContext.getServletContext();
-
-        assertNotNull(servletContext);
-        assertNotNull(webApplicationContext.getBean("appUserController"));
-    }
-
-    @Test
     public void givenGetURI_whenMockMVC_thenVerifyResponse() throws Exception {
         MvcResult mvcResult = this.mockMvc.perform(get("http://localhost:8081/api/v1/user"))
-                .andDo(print()).andExpect(status().isOk())
+                .andExpect(status().isOk())
                 .andReturn();
 
         assertEquals("application/json",
@@ -92,7 +87,6 @@ class AppUserControllerIT {
 
         assertEquals("text/plain;charset=UTF-8",
                 mvcResult.getResponse().getContentType());
-        verify(appUserService).signUpUser(any());
     }
 
 }
