@@ -40,9 +40,18 @@ public class AppUserService {
                 .map(existingDetail -> {
                     existingDetail.setName(newAppUserDetails.getName());
                     existingDetail.setEmail(newAppUserDetails.getEmail());
-                    existingDetail.setBooking(newAppUserDetails.getBooking());
                     appUserRepository.save(newAppUserDetails);
                     return "AppUser details has been updated successfully";
+                }).orElseThrow(() -> new IllegalArgumentException(
+                        String.format("%d does not exist", userId)));
+    }
+    public String changeSeat(Long userId, AppUser newAppUserDetails) {
+        return appUserRepository.findById(userId)
+                .map(existingDetail -> {
+                    existingDetail.setBooking(newAppUserDetails.getBooking());
+                    appUserRepository.save(newAppUserDetails);
+                    return String.format("AppUser booking has been updated successfully, " +
+                            "%s is the new seatNumber", newAppUserDetails.getBooking().getSeatNumber());
                 }).orElseThrow(() -> new IllegalArgumentException(
                         String.format("%d does not exist", userId)));
     }
